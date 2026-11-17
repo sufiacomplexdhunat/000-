@@ -1,0 +1,1 @@
+এই ZIP ফাইল Extract করলে app.js পাবেন। GitHub Repository-তে আগের app.js ফাইলের পরিবর্তে এটি আপলোড করুন। আপডেটের আগে অ্যাপের JSON Backup রাখুন।
