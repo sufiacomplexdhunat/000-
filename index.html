@@ -2,43 +2,28 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#14532d"><meta name="description" content="বাড়ি ভাড়া ব্যবস্থাপনা অ্যাপ">
+<meta name="theme-color" content="#14532d"><meta name="description" content="সুফিয়া কমপ্লেক্স বাড়ি ভাড়া ব্যবস্থাপনা অ্যাপ">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/icon-192.png">
-<title>বাড়ি ভাড়া ম্যানেজার</title><link rel="stylesheet" href="style.css">
+<title>সুফিয়া কমপ্লেক্স | ভাড়া ম্যানেজার</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div><h1>🏠 বাড়ি ভাড়া ম্যানেজার</h1><p>সহজ ভাড়া ও হিসাব ব্যবস্থাপনা</p></div><button id="installBtn" class="ghost" hidden>ইনস্টল</button></header>
+<header><div><h1>🏠 সুফিয়া কমপ্লেক্স</h1><p>ধুনট, বগুড়া · ০১৩০৯-৪৯৩০৬৯</p></div><button id="installBtn" class="ghost" hidden>ইনস্টল</button></header>
 <main>
 <section id="login" class="panel login">
-<h2>লগইন</h2><p class="muted">এই সংস্করণটি আপনার এই ডিভাইসেই তথ্য সংরক্ষণ করে।</p>
-<label>মোবাইল নম্বর<input id="loginPhone" inputmode="tel" placeholder="017xxxxxxxx"></label>
-<label>পাসওয়ার্ড<input id="loginPass" type="password" placeholder="পাসওয়ার্ড"></label>
+<h2>বাড়িওয়ালার লগইন</h2><p class="muted">এই অ্যাপের তথ্য শুধু এই ডিভাইসের ব্রাউজারে সংরক্ষিত হয়।</p>
+<label>মোবাইল নম্বর<input id="loginPhone" inputmode="tel" placeholder="017xxxxxxxx" autocomplete="username"></label>
+<label>পাসওয়ার্ড<input id="loginPass" type="password" placeholder="পাসওয়ার্ড" autocomplete="current-password"></label>
 <button id="loginBtn">প্রবেশ করুন</button>
 <details><summary>প্রথমবার ব্যবহার করছেন?</summary><p>প্রাথমিক অ্যাডমিন লগইন:</p><b>মোবাইল: 01700000000</b><br><b>পাসওয়ার্ড: ChangeMe123!</b><p class="muted">প্রবেশের পর সেটিংস থেকে পাসওয়ার্ড পরিবর্তন করুন।</p></details>
 </section>
 <section id="app" hidden>
-<nav class="tabs">
-<button data-tab="dashboard" class="active">ড্যাশবোর্ড</button><button data-tab="houses">বাড়ি/ফ্ল্যাট</button><button data-tab="tenants">ভাড়াটিয়া</button><button data-tab="accounts">হিসাব</button><button data-tab="settings">সেটিংস</button>
-</nav>
-<div id="dashboard" class="tab panel">
-<h2>ড্যাশবোর্ড</h2><div class="stats" id="stats"></div><h3>সাম্প্রতিক হিসাব</h3><div id="recent"></div>
-</div>
-<div id="houses" class="tab panel" hidden><h2>বাড়ি ও ফ্ল্যাট</h2>
-<form id="houseForm" class="formgrid"><label>বাড়ির নাম<input name="name" required placeholder="যেমন: সুফিয়া ভবন"></label><label>ঠিকানা<input name="address" placeholder="ঠিকানা"></label><label>ফ্ল্যাট/ইউনিট নম্বর<input name="unit" placeholder="যেমন: A-1"></label><button>ইউনিট যোগ করুন</button></form><div id="houseList"></div></div>
-<div id="tenants" class="tab panel" hidden><h2>ভাড়াটিয়া</h2>
-<form id="tenantForm" class="formgrid"><label>নাম<input name="name" required></label><label>মোবাইল<input name="phone" required inputmode="tel"></label><label>ইউনিট<select name="unit" id="tenantUnit" required></select></label><label>মাসিক ভাড়া (৳)<input name="rent" type="number" min="0" required></label><label>জামানত/অগ্রিম (৳)<input name="deposit" type="number" min="0" value="0"></label><button>ভাড়াটিয়া যোগ করুন</button></form><div id="tenantList"></div></div>
-<div id="accounts" class="tab panel" hidden><h2>মাসিক বিল ও পেমেন্ট</h2>
-<form id="chargeForm" class="formgrid"><label>ভাড়াটিয়া<select name="tenant" id="chargeTenant" required></select></label><label>মাস<input name="month" type="month" required></label><label>বিলের ধরন<select name="type"><option>ভাড়া</option><option>বিদ্যুৎ</option><option>গ্যাস</option><option>পানি</option><option>অন্যান্য</option></select></label><label>টাকার পরিমাণ<input name="amount" type="number" min="0" required></label><button>বিল যোগ করুন</button></form>
-<form id="paymentForm" class="formgrid"><label>ভাড়াটিয়া<select name="tenant" id="paymentTenant" required></select></label><label>তারিখ<input name="date" type="date" required></label><label>পরিশোধের ধরন<select name="type"><option>ভাড়া</option><option>বিদ্যুৎ</option><option>গ্যাস</option><option>পানি</option><option>অন্যান্য</option><option>জামানত</option></select></label><label>পরিমাণ (৳)<input name="amount" type="number" min="1" required></label><label>নোট<input name="note" placeholder="ঐচ্ছিক"></label><button>পেমেন্ট সংরক্ষণ</button></form>
-<div id="accountList"></div></div>
-<div id="settings" class="tab panel" hidden><h2>সেটিংস ও ব্যাকআপ</h2>
-<form id="passwordForm" class="formgrid"><label>নতুন অ্যাডমিন মোবাইল<input name="phone" required></label><label>নতুন পাসওয়ার্ড<input name="password" type="password" required minlength="6"></label><button>লগইন পরিবর্তন</button></form>
-<div class="actions"><button id="exportBtn">ডেটা ব্যাকআপ ডাউনলোড</button><label class="filebtn">ব্যাকআপ ফিরিয়ে আনুন<input id="importFile" type="file" accept="application/json"></label><button id="logoutBtn" class="danger">লগআউট</button></div>
-<p class="notice">গুরুত্বপূর্ণ: এই ফ্রি সংস্করণে ডেটা শুধু এই ব্রাউজার/ডিভাইসে থাকে। ব্রাউজারের ডেটা মুছে গেলে তথ্য হারাতে পারেন। নিয়মিত ব্যাকআপ ডাউনলোড করুন। এই সংস্করণটি শুধু বাড়িওয়ালার ব্যবহারের জন্য; ভাড়াটিয়াদের আলাদা লগইন নেই।</p>
-</div>
+<nav class="tabs"><button data-tab="dashboard" class="active">ড্যাশবোর্ড</button><button data-tab="houses">বাড়ি/ফ্ল্যাট</button><button data-tab="tenants">ভাড়াটিয়া</button><button data-tab="accounts">ভাড়া আদায়</button><button data-tab="settings">সেটিংস</button></nav>
+<div id="dashboard" class="tab panel"><h2>সুফিয়া কমপ্লেক্স</h2><p>ধুনট, বগুড়া · ০১৩০৯-৪৯৩০৬৯</p><div class="stats" id="stats"></div><h3>সাম্প্রতিক ভাড়াটিয়া</h3><div id="recent"></div></div>
+<div id="houses" class="tab panel" hidden><h2>বাড়ি ও ফ্ল্যাট</h2><form id="houseForm" class="formgrid"><label>বাড়ির নাম<input name="name" required placeholder="যেমন: সুফিয়া কমপ্লেক্স"></label><label>ঠিকানা<input name="address" placeholder="ঠিকানা"></label><label>ইউনিট/রুম নম্বর<input name="unit" placeholder="যেমন: A-1"></label><button>ইউনিট যোগ করুন</button></form><div id="houseList"></div></div>
+<div id="tenants" class="tab panel" hidden><h2>ভাড়াটিয়া</h2><form id="tenantForm" class="formgrid"><label>নাম<input name="name" required></label><label>মোবাইল<input name="phone" required inputmode="tel"></label><label>ঠিকানা<input name="address" placeholder="স্থায়ী/বর্তমান ঠিকানা"></label><label>জাতীয় পরিচয়পত্র নম্বর (NID)<input name="nid" inputmode="numeric" placeholder="NID নম্বর"></label><label>মিটার নম্বর<input name="meter" placeholder="মিটার নম্বর"></label><label>ইউনিট/রুম নম্বর<select name="unit" id="tenantUnit" required></select></label><label>মাসিক ভাড়া (৳)<input name="rent" type="number" min="0" required></label><label>জামানত/অগ্রিম (৳)<input name="deposit" type="number" min="0" value="0"></label><button>ভাড়াটিয়া যোগ করুন</button></form><div id="tenantList"></div></div>
+<div id="accounts" class="tab panel" hidden><h2>ভাড়া আদায় ও রসিদ</h2><h3>মাসিক ভাড়ার বিল</h3><form id="chargeForm" class="formgrid"><label>ভাড়াটিয়া<select name="tenant" id="chargeTenant" required></select></label><label>ভাড়ার মাস<input name="month" type="month" required></label><label>ভাড়ার পরিমাণ (৳)<input name="amount" type="number" min="1" required></label><button>ভাড়ার বিল যোগ করুন</button></form><h3>ভাড়া গ্রহণ</h3><form id="paymentForm" class="formgrid"><label>ভাড়াটিয়া<select name="tenant" id="paymentTenant" required></select></label><label>তারিখ<input name="date" type="date" required></label><label>ভাড়ার মাস<input name="month" type="month" required></label><label>পরিমাণ (৳)<input name="amount" type="number" min="1" required></label><label>নোট<input name="note" placeholder="ঐচ্ছিক"></label><button>ভাড়া গ্রহণ ও রসিদ তৈরি</button></form><div id="accountList"></div></div>
+<div id="settings" class="tab panel" hidden><h2>সেটিংস ও ব্যাকআপ</h2><form id="passwordForm" class="formgrid"><label>নতুন অ্যাডমিন মোবাইল<input name="phone" required></label><label>নতুন পাসওয়ার্ড<input name="password" type="password" required minlength="6"></label><button>লগইন পরিবর্তন</button></form><div class="actions"><button id="exportBtn">ডেটা ব্যাকআপ ডাউনলোড</button><label class="filebtn">ব্যাকআপ ফিরিয়ে আনুন<input id="importFile" type="file" accept="application/json"></label><button id="logoutBtn" class="danger">লগআউট</button></div><p class="notice">গুরুত্বপূর্ণ: ডেটা শুধু এই ডিভাইসের ব্রাউজারে থাকে। ব্রাউজারের ডেটা মুছে গেলে তথ্য হারাতে পারেন। নিয়মিত ব্যাকআপ ডাউনলোড করে রাখুন। এটি শুধু বাড়িওয়ালার ব্যবহারের অ্যাপ।</p></div>
 </section>
-<section id="tenantView" class="panel" hidden><button id="tenantLogout" class="ghost">লগআউট</button><h2>আমার ভাড়া হিসাব</h2><div id="tenantStatement"></div></section>
-</main>
-<footer>বাড়ি ভাড়া ম্যানেজার · বিনামূল্যের পরীক্ষামূলক সংস্করণ</footer>
+</main><footer>সুফিয়া কমপ্লেক্স · বাড়ি ভাড়া ব্যবস্থাপনা</footer>
 <script src="app.js"></script>
 </body></html>
