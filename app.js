@@ -12,7 +12,7 @@ function login(){let p=$('#loginPhone').value.trim(),pw=$('#loginPass').value;if
 $('#loginBtn').onclick=login;$('#loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 $$('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 $('#houseForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);db.units.push({id:id(),name:f.get('name'),address:f.get('address'),unit:f.get('unit')});e.target.reset();save()};
-$('#tenantForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);if(!db.units.some(u=>u.id===f.get('unit')))return alert('আগে বাড়ি/ফ্ল্যাট যোগ করুন');db.tenants.push({id:id(),name:f.get('name'),phone:f.get('phone'),unit:f.get('unit'),rent:+f.get('rent'),deposit:+f.get('deposit'),password:f.get('password')});e.target.reset();save()};
+$('#tenantForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);if(!db.units.some(u=>u.id===f.get('unit')))return alert('আগে বাড়ি/ফ্ল্যাট যোগ করুন');db.tenants.push({id:id(),name:f.get('name'),phone:f.get('phone'),unit:f.get('unit'),rent:+f.get('rent'),deposit:+f.get('deposit')});e.target.reset();save()};
 $('#chargeForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);db.charges.push({id:id(),tenant:f.get('tenant'),month:f.get('month'),type:f.get('type'),amount:+f.get('amount')});e.target.reset();save()};
 $('#paymentForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);db.payments.push({id:id(),tenant:f.get('tenant'),date:f.get('date'),type:f.get('type'),amount:+f.get('amount'),note:f.get('note')});e.target.reset();save()};
 $('#passwordForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);db.admin={phone:f.get('phone'),password:f.get('password')};save();alert('অ্যাডমিন লগইন পরিবর্তন হয়েছে')};
