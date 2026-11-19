@@ -1,0 +1,8 @@
+আপলোডের আগে বর্তমান অ্যাপ থেকে Settings > Backup Download করে রাখুন।
+ZIP থেকে index.html, app.js, style.css, sw.js, manifest.webmanifest ফাইলগুলো GitHub রিপোজিটরির মূল ফোল্ডারে আপলোড করে Replace করুন।
+assets ফোল্ডার বা icon-192.png / icon-512.png মুছবেন বা বদলাবেন না।
+Commit changes দিন। GitHub Pages আপডেট হলে Chrome-এ সাইট খুলে Refresh করুন।
+ডাটা rent_manager_free_v1 localStorage-এ রাখা হয়েছে। একই ডিভাইস/ব্রাউজারে ডাটা রাখতে browser site data clear করবেন না।
+অ্যাপের ডাটা অন্য ডিভাইসে নিজে থেকে sync হয় না।
+নতুন ফিচার: ড্যাশবোর্ড, ভাড়াটিয়া তথ্য/সার্চ/এডিট/প্রিন্ট, ভাড়া আদায়, রসিদ আর্কাইভ ও পুনঃপ্রিন্ট, প্রত্যয়নপত্র, অগ্রিম বিল, ব্যাকআপ/রিস্টোর।
+নতুন ডাটাবেজের ডিফল্ট লগইন: 01700000000 / ChangeMe123! আগের ডাটাবেজে আগের লগইন থাকবে।
