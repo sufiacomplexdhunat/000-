@@ -1,0 +1,15 @@
+/* app.js-এ renderTenants() ফাংশনের ভেতরে সম্পাদনা বাটনের ঠিক পরে এই বাটনটি যোগ করুন: */
+<button class="smallbtn danger" onclick="deleteTenant('${t.id}')">মুছুন</button>
+
+/* app.js-এ function editTenant(id){ এর আগে এই ফাংশনটি যোগ করুন: */
+function deleteTenant(id){
+  const t=db.tenants.find(x=>x.id===id);
+  if(!t)return;
+  const ok=confirm('আপনি কি "'+t.name+'" ভাড়াটিয়ার তথ্য মুছতে চান?\n\nএই ভাড়াটিয়ার সঙ্গে থাকা বিল ও আদায়ের রেকর্ডও মুছে যাবে। আগে ব্যাকআপ রাখুন।');
+  if(!ok)return;
+  db.tenants=db.tenants.filter(x=>x.id!==id);
+  db.charges=db.charges.filter(x=>x.tenant!==id);
+  db.payments=db.payments.filter(x=>x.tenant!==id);
+  save();
+  alert('ভাড়াটিয়ার তথ্য মুছে ফেলা হয়েছে');
+}

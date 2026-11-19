@@ -1,0 +1,2 @@
+/* style.css ফাইলের একেবারে শেষে যোগ করুন: */
+button.danger{background:#b91c1c;color:white}
