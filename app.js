@@ -22,7 +22,7 @@ function printHTML(html){let w=window.open('','_blank');w.document.write(`<html 
 function printTenant(id){let t=db.tenants.find(x=>x.id===id);printHTML(`<h2>ভাড়াটিয়ার তথ্য</h2><p>নাম: ${esc(t.name)}</p><p>হিসাব নম্বর: ${esc(t.accountNo||'—')}</p><p>রুম: ${esc(room(t))}</p><p>মোবাইল: ${esc(t.phone||'—')}</p><p>ঠিকানা: ${esc(t.address||'—')}</p><p>এনআইডি: ${esc(t.nid||'—')}</p><p>মাসিক ভাড়া: ${money(t.rent)}</p><p>জমা: ${money(t.deposit)}</p>`)}
 function renderBills(){let a=db.charges.map(c=>({...c,paid:db.payments.filter(p=>p.tenant===c.tenant&&p.month===c.month&&p.type===c.type).reduce((s,p)=>s+Number(p.amount),0)})).filter(c=>c.amount>c.paid);$('#billList').innerHTML=a.map(c=>`<div class="bill"><div class="row"><div><b>${esc(tname(c.tenant))}</b><div>${esc(c.month)} | ${esc(c.type)} | বাকি ${money(c.amount-c.paid)}</div></div><button class="smallbtn" onclick="collect('${c.id}')">ভাড়া আদায়</button></div></div>`).join('')||'<p>কোনো বকেয়া বিল নেই।</p>'}
 
-/* রসিদ নম্বর: আগে থেকে থাকা সর্বোচ্চ নম্বরের পরের নম্বর; মুছে ফেলা নম্বর পুনরায় ব্যবহার হবে না। */
+/* রসিদ নম্বর: A 001 থেকে থাকা সর্বোচ্চ নম্বরের পরের নম্বর; মুছে ফেলা নম্বর পুনরায় ব্যবহার হবে না। */
 function nextReceiptNo(){const maxNo=Math.max(0,Number(db.receiptSeq)||0,...db.payments.map(p=>{const m=String(p.receiptNo||'').match(/^\s*A\s*[-#]?\s*(\d+)\s*$/i);return m?Number(m[1]):0}));db.receiptSeq=maxNo+1;return 'A '+String(db.receiptSeq).padStart(3,'0')}
 
 /* টাকা দেওয়ার পর ক্যালেন্ডার থেকে রসিদের তারিখ নির্বাচন */
