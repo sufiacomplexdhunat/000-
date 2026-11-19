@@ -6,8 +6,33 @@ function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function room(t){let old=db.units.find(u=>u.id===t.unit);return old?old.unit:(t.unit||'—')}
 function tname(id){return db.tenants.find(t=>t.id===id)?.name||'অজানা'}
+function allocations(){
+ const paid={}; db.charges.forEach(c=>paid[c.id]=0);
+ db.payments.filter(p=>p.chargeId).forEach(p=>{if(paid[p.chargeId]!==undefined)paid[p.chargeId]+=Number(p.amount||0)});
+ const legacy=db.payments.filter(p=>!p.chargeId).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+ legacy.forEach(p=>{
+  let left=Number(p.amount||0);
+  const matches=db.charges.filter(c=>c.tenant===p.tenant&&c.month===p.month&&c.type===p.type);
+  for(const c of matches){let due=Math.max(0,Number(c.amount||0)-paid[c.id]);if(!due)continue;let use=Math.min(left,due);paid[c.id]+=use;left-=use;if(left<=0)break}
+ });
+ return paid;
+}
+function paidFor(c){return allocations()[c.id]||0}
 function totals(id){let c=db.charges.filter(x=>x.tenant===id).reduce((a,x)=>a+Number(x.amount||0),0),p=db.payments.filter(x=>x.tenant===id).reduce((a,x)=>a+Number(x.amount||0),0);return{charge:c,paid:p,due:c-p}}
-function ensureBills(){let m=monthNow();db.tenants.forEach(t=>{if(t.rent&&!db.charges.some(c=>c.tenant===t.id&&c.month===m&&c.type==='ভাড়া'))db.charges.push({id:uid(),tenant:t.id,month:m,type:'ভাড়া',amount:Number(t.rent)})});db.autoLastMonth=m;localStorage.setItem(KEY,JSON.stringify(db))}
+function ensureBills(){
+ const current=monthNow();
+ const monthList=[];
+ if(db.autoLastMonth){
+  let [y,m]=db.autoLastMonth.split('-').map(Number);m++;
+  while(y*100+m<=Number(current.replace('-',''))){if(m>12){m=1;y++}monthList.push(`${y}-${String(m).padStart(2,'0')}`);m++}
+ }else monthList.push(current);
+ if(!monthList.includes(current))monthList.push(current);
+ monthList.forEach(month=>db.tenants.forEach(t=>{
+  if(Number(t.rent)>0&&!db.charges.some(c=>c.tenant===t.id&&c.month===month&&c.type==='ভাড়া'))
+   db.charges.push({id:uid(),tenant:t.id,month,type:'ভাড়া',amount:Number(t.rent)});
+ }));
+ db.autoLastMonth=current;localStorage.setItem(KEY,JSON.stringify(db));
+}
 function showTab(id){$$('.page').forEach(x=>x.hidden=x.id!==id);$$('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));render()}
 function render(){ $('#sTenants').textContent=db.tenants.length.toLocaleString('bn-BD');$('#sDue').textContent=money(db.tenants.reduce((a,t)=>a+Math.max(0,totals(t.id).due),0));$('#sPaid').textContent=money(db.payments.reduce((a,p)=>a+Number(p.amount||0),0));renderTenants();renderBills();renderReceipts();$('#certTenant').innerHTML=db.tenants.map(t=>`<option value="${t.id}">${esc(t.name)} — ${esc(room(t))}</option>`).join('')}
 function clearForm(){$('#tenantForm').reset();$('#tenantId').value='';$('#tenantFormTitle').textContent='নতুন ভাড়াটিয়া যোগ'}
@@ -16,10 +41,29 @@ $('#tenantForm').onsubmit=e=>{e.preventDefault();let id=$('#tenantId').value,t={
 function editTenant(id){let t=db.tenants.find(x=>x.id===id);$('#tenantId').value=t.id;['accountNo','name','phone','address','nid','rent','deposit'].forEach(k=>$('#'+k).value=t[k]??'');$('#unit').value=room(t);$('#tenantFormTitle').textContent='ভাড়াটিয়ার তথ্য সম্পাদনা';window.scrollTo(0,0)}
 function profile(id){let t=db.tenants.find(x=>x.id===id),b=totals(id);$('#modalBody').innerHTML=`<h2>${esc(t.name)}</h2><p>হিসাব নম্বর: ${esc(t.accountNo||'—')}</p><p>বাসা/রুম: ${esc(room(t))}</p><p>মোবাইল: ${esc(t.phone||'—')}</p><p>ঠিকানা: ${esc(t.address||'—')}</p><p>জাতীয় পরিচয়পত্র: ${esc(t.nid||'—')}</p><p>মাসিক ভাড়া: ${money(t.rent)} | জমা: ${money(t.deposit)}</p><p>মোট বিল: ${money(b.charge)} | আদায়: ${money(b.paid)} | বকেয়া: ${money(Math.max(0,b.due))}</p><label>অগ্রিম বিলের পরিমাণ<input id="advanceAmount" type="number" min="1"></label><button onclick="addAdvance('${id}')">অগ্রিম বিল যোগ</button> <button class="secondary" onclick="printTenant('${id}')">তথ্য প্রিন্ট</button>`;$('#modal').hidden=false}
 function addAdvance(id){let n=Number($('#advanceAmount').value);if(!n)return alert('টাকার পরিমাণ লিখুন');db.charges.push({id:uid(),tenant:id,month:monthNow(),type:'অগ্রিম',amount:n});save();profile(id)}
-function printHTML(html){let w=window.open('','_blank');w.document.write(`<html lang="bn"><meta charset="utf-8"><style>body{font-family:system-ui,'Noto Sans Bengali',sans-serif;padding:18px}.receipt-paper{border:1px solid #333;padding:12px;height:125mm;margin-bottom:3mm}.receipt-paper h3{text-align:center}</style><body>${html}</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function printHTML(html){
+ let w=window.open('','_blank');
+ if(!w){alert('প্রিন্ট পেজ খোলা যায়নি। ব্রাউজারের Pop-ups অনুমতি দিন, তারপর আবার চেষ্টা করুন।');return}
+ w.document.open();
+ w.document.write(`<!doctype html><html lang="bn"><head><meta charset="utf-8"><title>প্রিন্ট</title><style>body{font-family:system-ui,'Noto Sans Bengali',sans-serif;padding:12px;color:#111}.receipt-paper{border:1px solid #333;padding:10px;height:125mm;margin:0 0 3mm;break-inside:avoid}.receipt-paper h3{text-align:center;margin:2px}.receipt-paper p{margin:5px 0}@media print{body{padding:0}}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script></body></html>`);
+ w.document.close();w.focus();
+}
 function printTenant(id){let t=db.tenants.find(x=>x.id===id);printHTML(`<h2>ভাড়াটিয়ার তথ্য</h2><p>নাম: ${esc(t.name)}</p><p>হিসাব নম্বর: ${esc(t.accountNo||'—')}</p><p>রুম: ${esc(room(t))}</p><p>মোবাইল: ${esc(t.phone||'—')}</p><p>ঠিকানা: ${esc(t.address||'—')}</p><p>এনআইডি: ${esc(t.nid||'—')}</p><p>মাসিক ভাড়া: ${money(t.rent)}</p><p>জমা: ${money(t.deposit)}</p>`)}
-function renderBills(){let a=db.charges.map(c=>({...c,paid:db.payments.filter(p=>p.tenant===c.tenant&&p.month===c.month&&p.type===c.type).reduce((s,p)=>s+Number(p.amount),0)})).filter(c=>c.amount>c.paid);$('#billList').innerHTML=a.map(c=>`<div class="bill"><div class="row"><div><b>${esc(tname(c.tenant))}</b><div>${esc(c.month)} | ${esc(c.type)} | বাকি ${money(c.amount-c.paid)}</div></div><button class="smallbtn" onclick="collect('${c.id}')">ভাড়া আদায়</button></div></div>`).join('')||'<p>কোনো বকেয়া বিল নেই।</p>'}
-function collect(id){let c=db.charges.find(x=>x.id===id),paid=db.payments.filter(p=>p.tenant===c.tenant&&p.month===c.month&&p.type===c.type).reduce((s,p)=>s+Number(p.amount),0),left=c.amount-paid,n=Number(prompt(`আদায়ের পরিমাণ লিখুন (সর্বোচ্চ ${left})`,left));if(!n||n<=0||n>left)return;let no=String(++db.receiptSeq).padStart(4,'0');db.payments.push({id:uid(),tenant:c.tenant,date:new Date().toISOString().slice(0,10),month:c.month,type:c.type,amount:n,receiptNo:no});save();printReceipt(db.payments.at(-1).id)}
+function renderBills(){let a=db.charges.map(c=>({...c,paid:paidFor(c)})).filter(c=>Number(c.amount)>c.paid);$('#billList').innerHTML=a.map(c=>`<div class="bill"><div class="row"><div><b>${esc(tname(c.tenant))}</b><div>${esc(c.month)} | ${esc(c.type)} | বিল ${money(c.amount)} | বাকি ${money(c.amount-c.paid)}</div></div><button class="smallbtn" onclick="collect('${c.id}')">ভাড়া আদায়</button></div></div>`).join('')||'<p>কোনো বকেয়া বিল নেই।</p>'}
+function collect(id){
+ const c=db.charges.find(x=>x.id===id);if(!c)return;
+ const left=Number(c.amount)-paidFor(c);
+ $('#modalBody').innerHTML=`<h3>ভাড়া আদায়</h3><p>${esc(tname(c.tenant))} — ${esc(c.month)} (${esc(c.type)})</p><p>বকেয়া: <b>${money(left)}</b></p><label>আদায়ের পরিমাণ<input id="collectAmount" type="number" min="1" max="${left}" value="${left}"></label><button onclick="confirmCollect('${id}')">আদায় সংরক্ষণ</button>`;
+ $('#modal').hidden=false;
+}
+function confirmCollect(id){
+ const c=db.charges.find(x=>x.id===id);if(!c)return;
+ const left=Number(c.amount)-paidFor(c),n=Number($('#collectAmount').value);
+ if(!Number.isFinite(n)||n<=0||n>left){alert('সঠিক আদায়ের পরিমাণ লিখুন।');return}
+ let no=String(++db.receiptSeq).padStart(4,'0');
+ const payment={id:uid(),chargeId:c.id,tenant:c.tenant,date:new Date().toISOString().slice(0,10),month:c.month,type:c.type,amount:n,receiptNo:no};
+ db.payments.push(payment);save();$('#modal').hidden=true;alert('ভাড়া আদায় সংরক্ষণ হয়েছে। রসিদ মেনু থেকে প্রিন্ট করুন।');
+}
 function receiptMarkup(p,copy){let t=db.tenants.find(x=>x.id===p.tenant)||{};return `<div class="receipt-paper"><h3>সুফিয়া কমপ্লেক্স</h3><p style="text-align:center">ভাড়া আদায়ের রসিদ — ${copy}</p><hr><p>রসিদ নং: ${esc(p.receiptNo)} | তারিখ: ${esc(p.date)}</p><p>ভাড়াটিয়া: ${esc(t.name||'')}</p><p>হিসাব: ${esc(t.accountNo||'—')} | রুম: ${esc(room(t))}</p><p>মাস: ${esc(p.month)} | বিবরণ: ${esc(p.type)}</p><p>আদায়কৃত টাকা: <b>${money(p.amount)}</b></p><p>গ্রহণকারীর স্বাক্ষর: __________________</p></div>`}
 function printReceipt(id){let p=db.payments.find(x=>x.id===id);printHTML(receiptMarkup(p,'ভাড়াটিয়ার কপি')+receiptMarkup(p,'মালিকের কপি'))}
 function renderReceipts(){$('#receiptList').innerHTML=[...db.payments].reverse().map(p=>`<div class="receipt"><div class="row"><div><b>রসিদ নং ${esc(p.receiptNo)}</b><div>${esc(tname(p.tenant))} | ${esc(p.date)} | ${money(p.amount)}</div></div><button class="smallbtn" onclick="printReceipt('${p.id}')">পুনরায় প্রিন্ট</button></div></div>`).join('')||'<p>এখনো কোনো রসিদ নেই।</p>'}
